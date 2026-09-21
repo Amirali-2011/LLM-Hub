@@ -1,6 +1,7 @@
 package com.llmhub.llmhub
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.first
 import com.llmhub.llmhub.navigation.LlmHubNavigation
@@ -25,6 +27,7 @@ import com.llmhub.llmhub.utils.LocaleHelper
 
 class MainActivity : ComponentActivity() {
     private lateinit var themeViewModel: ThemeViewModel
+    private var navController: NavHostController? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +58,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
+                    this@MainActivity.navController = navController
                     LlmHubNavigation(
                         navController = navController,
                         chatViewModelFactory = chatViewModelFactory,
@@ -64,6 +68,12 @@ class MainActivity : ComponentActivity() {
                 } // CompositionLocalProvider
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        navController?.handleDeepLink(intent)
     }
     
     override fun attachBaseContext(newBase: Context) {
