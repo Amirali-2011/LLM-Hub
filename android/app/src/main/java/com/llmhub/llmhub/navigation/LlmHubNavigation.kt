@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import com.llmhub.llmhub.LlmHubApplication
 import com.llmhub.llmhub.screens.*
 import com.llmhub.llmhub.viewmodels.ChatViewModelFactory
@@ -190,12 +191,6 @@ fun LlmHubNavigation(
             val chatId = backStackEntry.arguments?.getString("chatId") ?: "new"
             val creatorId = backStackEntry.arguments?.getString("creatorId")
 
-
-            // We need to pass creatorId to ChatScreen/ViewModel somehow.
-            // Since ChatScreen takes a ViewModel, we might need to update ChatScreen signature
-            // or rely on ViewModel to handle "new" chat with params.
-            // Actually, ChatScreen instantiates the ViewModel. We should pass arguments there.
-            
             ChatScreen(
                 chatId = chatId,
                 creatorId = creatorId,
@@ -269,12 +264,17 @@ fun LlmHubNavigation(
             )
         }
 
-        composable(Screen.VibeVoice.route) {
+        // ↓↓↓ تنها بخشی که واقعاً تغییر کرده همینجاست (deepLinks اضافه شد) ↓↓↓
+        composable(
+            route = Screen.VibeVoice.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "llmhub://vibevoice" })
+        ) {
             VibeVoiceScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToModels = { navController.navigate(Screen.Models.route) }
             )
         }
+        // ↑↑↑ تا اینجا ↑↑↑
 
         composable(Screen.ImageUpscale.route) {
             ImageUpscaleScreen(
