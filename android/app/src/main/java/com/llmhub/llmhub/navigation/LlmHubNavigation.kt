@@ -41,7 +41,11 @@ sealed class Screen(val route: String) {
     object ScamDetector : Screen("scam_detector")
     object ImageGenerator : Screen("image_generator")
     object VibeCoder : Screen("vibe_coder")
-    object VibeVoice : Screen("vibevoice")
+   object VibeVoice : Screen("vibevoice?model={model}") {
+    fun createRoute(model: String? = null): String {
+        return if (model != null) "vibevoice?model=${android.net.Uri.encode(model)}" else "vibevoice"
+    }
+}
     object ImageUpscale : Screen("image_upscale")
     object CodeCanvas : Screen("code_canvas") {
         fun createRoute(codeContent: String, codeType: String = "html") =
@@ -142,7 +146,7 @@ fun LlmHubNavigation(
                         "image_generator" -> navigateIfPremium(Screen.ImageGenerator.route)
                         "vibe_coder" -> navigateIfPremium(Screen.VibeCoder.route)
                         "creator_generation" -> navigateIfPremium(Screen.CreatorGeneration.route)
-                        "vibevoice" -> navigateIfPremium(Screen.VibeVoice.route)
+                        "vibevoice" -> navigateIfPremium(Screen.VibeVoice.createRoute())
                         "image_upscale" -> navController.navigate(Screen.ImageUpscale.route)
                         "agent" -> navigateIfPremium(Screen.Agent.route)
                         "text_to_speech" -> navController.navigate(Screen.TextToSpeech.route)
@@ -266,14 +270,19 @@ fun LlmHubNavigation(
 
         // ↓↓↓ تنها بخشی که واقعاً تغییر کرده همینجاست (deepLinks اضافه شد) ↓↓↓
         composable(
-            route = Screen.VibeVoice.route,
-            deepLinks = listOf(navDeepLink { uriPattern = "llmhub://vibevoice" })
-        ) {
-            VibeVoiceScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToModels = { navController.navigate(Screen.Models.route) }
-            )
-        }
+    route = Screen.VibeVoice.route,
+    arguments = listOf(
+        androidx.navigation.navArgument("model") { nullable = true; defaultValue = null }
+    ),
+    deepLinks = listOf(navDeepLink { uriPattern = "llmhub://vibevoice?model={model}" })
+) { backStackEntry ->
+    val requestedModel = backStackEntry.arguments?.getString("model")
+    VibeVoiceScreen(
+        onNavigateBack = { navController.popBackStack() },
+        onNavigateToModels = { navController.navigate(Screen.Models.route) },
+        requestedModelName = requestedModel
+    )
+}
         // ↑↑↑ تا اینجا ↑↑↑
 
         composable(Screen.ImageUpscale.route) {
