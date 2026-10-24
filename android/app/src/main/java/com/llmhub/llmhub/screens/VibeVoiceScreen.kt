@@ -87,6 +87,7 @@ import kotlinx.coroutines.launch
 fun VibeVoiceScreen(
     onNavigateBack: () -> Unit,
     onNavigateToModels: () -> Unit,
+    requestedModelName: String? = null,   // ← این خط جدیده
     viewModel: VibeVoiceViewModel = viewModel()
 ) {
     val availableLlmModels by viewModel.availableLlmModels.collectAsState()
